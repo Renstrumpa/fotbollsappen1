@@ -155,7 +155,7 @@ function updateSessionDrillsList() {
 
         listItem.className = "drill-card p-4 border rounded shadow-md mb-4";
 
-        listItem.innerHTML = `  
+        listItem.innerHTML = `
                 <h3 class="text-lg font-semibold">${drill.Name}</h3>
                 <p class="text-gray-700">${drill.Description}</p>
                 <p>Duration: ${drill.Duration} minutes</p>
@@ -181,7 +181,7 @@ function displayDrills(drills) {
     const drillCard = document.createElement('div');   // create the data box
     drillCard.className = 'drill-card p-4 border rounded shadow-md mb-4';
 
-    drillCard.innerHTML = `  
+    drillCard.innerHTML = `
             <h3 class="text-lg font-semibold">${drill.Name}</h3>
             <p class="text-gray-700">${drill.Description}</p>
             <p>Duration: ${drill.Duration} minutes</p>
@@ -269,8 +269,9 @@ else if (confirm("Click Save to save session with drill, it store this session a
       saveSessionToSheets();
 
 }
-    import('jspdf').then(jsPDF => {
-        const { jsPDF } = jsPDF;
+
+        const { jsPDF } = window.jspdf;
+
         const pdf = new jsPDF();
 
         pdf.text(`Session Name: ${currentSession.Name}`, 10, 10);
@@ -293,7 +294,7 @@ else if (confirm("Click Save to save session with drill, it store this session a
         });
 
         pdf.save(`${currentSession.Name}.pdf`);
-    });
+
   };
 
 getDrills();
