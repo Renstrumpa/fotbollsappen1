@@ -52,20 +52,16 @@ function displayDrills(drills) {
   });
 }
 
-getDrills(); // Call the function to fetch and display drills on page load
-
-// ... (Existing code from before)
+getDrills();
 
 const sessionForm = document.getElementById('session-form');
 const createSessionButton = document.getElementById('create-session');
 const sessionDrillsList = document.getElementById('session-drills-list');
-const exportPdfButton = document.getElementById('export-pdf');
 
 let sessionDrills = []; // Array to hold drill IDs for the current session
 let currentSession = null;  // Holds current session
 
 createSessionButton.addEventListener('click', createSession);
-exportPdfButton.addEventListener('click', exportSessionToPDF);
 
 function createSession() {
   const sessionName = document.getElementById('session-name').value;
@@ -198,103 +194,3 @@ function displayDrills(drills) {
 
 }
 // call displayDrills after pushing/patching a google sheet object, the screen can auto update
-
-
-// Function to save session data back to Google Sheets
-async function saveSessionToSheets() {
-// ... Implementation to write session data to the 'Sessions' sheet ...
-    // Save Session to Google Sheets and include selected drill IDs
-    const apiUrl = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/Sessions:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS&key=${apiKey}`;
-
-
-    //Format all drills in the 'sessionDrills' array to a commaseperated String
-    //DrillIDs  is a must in column in `sheet 2: sessions`, otherwise Google Sheets can't map it correct!
-    const DrillIDs = sessionDrills.join(', ')
-
-
-    //Set Column Order,  Important !
-    //Always: ID, NAME, COACH, LOCATION, TARGETAGE, `DrillIDs`, and the rest
-
-    const values = [[currentSession.ID, currentSession.Name, currentSession.Coach, currentSession.Location, currentSession.TargetAge, DrillIDs]]
-
-    //Build Request Object
-
-    const requestBody = {
-        values: values
-      };
-      console.log(values)
-
-    try {
-
-        //Try post Request to Sheets
-
-        const response = await fetch(apiUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(requestBody),
-
-        });
-        const responseData = await response.json();
-
-        console.log(responseData)
-
-        alert("Successfully stored a session with Drills inside of the session sheets! (Click Export to PDF after this)")
-
-      }
-
-      catch (error) {
-
-        console.error('Error post sheet Values:', error);
-        alert("An Error occured. Please check you have enabled the 'Google Sheets API'")
-
-      }
-}
-
- // Export to PDF Feature:
-function exportSessionToPDF() {
-
-if (currentSession === null){
-  alert('No Session exist at the moment. Please store and create a session first.');
-  return;
-}
-
-else if (sessionDrills.length === 0){
-  alert("No Drills assigned, save session with drill. If you did, please refresh page.")
-  return
-}
-
-else if (confirm("Click Save to save session with drill, it store this session at your sheet, the data can always override. The current time is not stored and it would require coding.")){
-      saveSessionToSheets();
-
-}
-
-        const { jsPDF } = window.jspdf;
-
-        const pdf = new jsPDF();
-
-        pdf.text(`Session Name: ${currentSession.Name}`, 10, 10);
-        pdf.text(`Coach: ${currentSession.Coach}`, 10, 20);
-        pdf.text(`Location: ${currentSession.Location}`, 10, 30);
-        pdf.text(`Target Age: ${currentSession.TargetAge}`, 10, 40);
-
-         //Display the Drills which assigned
-
-        pdf.text("Selected Drills:", 10, 60);
-          sessionDrillsList.childNodes.forEach((child, index) => {
-
-
-            // PDF will show all items with his property
-            // drillItem is here named, that its only the drill properties which need to be displayed.
-            // not drillContainer, so only its inner Text instead the complete HTML
-              const drillItem = child.innerText
-            pdf.text(`${index + 1}. ${drillItem}`, 10, 70 + (index * 10));
-
-        });
-
-        pdf.save(`${currentSession.Name}.pdf`);
-
-  };
-
-getDrills();
