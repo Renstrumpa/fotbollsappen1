@@ -42,6 +42,7 @@ function displayDrills(drills) {
     drillCard.innerHTML = `
       <h3 class="text-lg font-semibold">${drill.Name}</h3>
       <p class="text-gray-700">${drill.Description}</p>
+      <p class="text-gray-700">${drill.Tema}</p>
       <p>Duration: ${drill.Duration} minutes</p>
       <p>Equipment: ${drill.Equipment}</p>
       ${drill.PictureLink ? `<img src="${drill.PictureLink}" alt="${drill.Name}" class="mt-2 max-w-full">` : ''}
