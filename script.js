@@ -271,7 +271,8 @@ async function saveSessionToSheets() {
   const requestBody = {
     values: values
   };
-
+console.log(JSON.stringify(values));
+const apiUrl = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/Sessions:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS&key=${apiKey}`;
   try {
     const response = await fetch(apiUrl, {
       method: 'POST',
