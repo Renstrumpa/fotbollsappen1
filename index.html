@@ -6,7 +6,65 @@
   
 </head>
 <body>
+
   <button id="authorizeButton">Authorize</button>
+    <div class="mt-8">
+      <h2 class="text-xl font-bold mb-4">Session Planner</h2>
+      <form id="session-form" class="mb-4">
+        <label for="session-name">Session Name:</label>
+        <input type="text" id="session-name" placeholder="Session Name" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"><br>
+
+        <label for="session-theme">Theme:</label>
+        <select id="session-theme" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+          <option value="attacking">Attacking</option>
+          <option value="defending">Defending</option>
+          <option value="transition">Transition</option>
+          <option value="fitness">Fitness</option>
+        </select><br>
+
+        <label for="session-coach">Coach:</label>
+        <select id="session-coach" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+          <option value="CoachA">Coach A</option>
+          <option value="CoachB">Coach B</option>
+          <option value="CoachC">Coach C</option>
+        </select><br>
+
+        <label for="session-location">Location:</label>
+        <select id="session-location" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+          <option value="KJ">KJ</option>
+          <option value="Majvallen">Majvallen</option>
+          <option value="Gröna Vallen">Gröna Vallen</option>
+        </select><br>
+
+        <label for="session-target-age">Target Age Group:</label>
+        <input type="text" id="session-target-age" placeholder="Target Age Group" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"><br>
+
+        <button type="button" id="create-session" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Create Session</button>
+        <button type="button" id="save-session" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Save Session</button>
+      </form>
+
+      <div id="session-drills">
+        <h3>Session Drills:</h3>
+        <ul id="session-drills-list"></ul>
+      </div>
+
+    </div>
+
+    <h1 class="text-2xl font-bold mb-4">Drill Library</h1>
+
+    <label for="drill-theme-filter">Filter by Theme:</label>
+    <select id="drill-theme-filter" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+      <option value="">All Themes</option>
+      <option value="attacking">Attacking</option>
+      <option value="defending">Defending</option>
+      <option value="possession">Possession</option>
+      <option value="fitness">Fitness</option>
+      <!-- Add other themes as needed -->
+    </select>
+
+    <div id="drill-library">
+      <!-- Drills will be dynamically added here -->
+    </div>
   <script src="script.js"></script>
 </body>
 </html>
