@@ -6,8 +6,9 @@ const REDIRECT_URI = 'https://renstrumpa.github.io/fotbollsappen1/'; // Your Red
 let accessToken = null;
 
 const drillLibrary = document.getElementById('drill-library');
-const drillThemeFilter = document.getElementById('drill-theme-filter');
-const sessionDrillsList = document.getElementById('session-drills-list');
+const drillThemeFilter = document.getElementById('drill-theme-filter'); // Get the filter element
+const sessionDrillsList = document.getElementById('session-drills-list'); // Get the session drills list
+let createSessionButton = document.getElementById('create-session');
 
 // Function to extract access token from URL fragment
 function getAccessTokenFromUrl() {
@@ -214,6 +215,27 @@ function updateSessionDrillsList() {
 
 // Function to save session data back to Google Sheets
 async function saveSessionToSheets() {
+   // 1. Get authResult
+   gapi.auth2.authorize({
+    client_id: CLIENT_ID,
+    scope: SCOPES,
+    immediate: false
+  }, function(authResult) {
+    if (authResult && !authResult.error) {
+      console.log('Authorization Result:', authResult);
+      // Access token is available, load the sheets API
+      gapi.client.load('sheets', 'v4', () => {
+        console.log("Sheets API loaded");
+        // Now that we are authorized and the API is loaded, load the drills
+        getDrills();
+      });
+      document.getElementById('authorizeButton').style.display = 'none';
+      document.getElementById('save-session').disabled = false;
+    } else {
+      console.error('There was an error authorizing:', authResult);
+    }
+  });
+
   if (!accessToken) {
     alert('Please authorize first.');
     return;
@@ -259,35 +281,13 @@ async function saveSessionToSheets() {
       },
       body: JSON.stringify({ values: values })
     });
-
-    const data = await response.json();
+    const data = await response.json()
     console.log(data);
-
     alert("Session saved successfully!");
-
   } catch (error) {
-    console.error('Error saving session:', error);
-    alert("Error saving session. Check console for details.");
+    console.log(error.message)
   }
-}
 
 // Load the API client after the page loads
-document.addEventListener('DOMContentLoaded', function() {
-  // Check for access token in URL
-  accessToken = getAccessTokenFromUrl();
-
-  if (accessToken) {
-    console.log("Access token found:", accessToken);
-    // Access token is available, load the drills
-    getDrills();
-    document.getElementById('authorizeButton').style.display = 'none';
-    document.getElementById('save-session').disabled = false;
-  } else {
-    console.log("No access token found");
-    document.getElementById('authorizeButton').style.display = 'block';
-    document.getElementById('save-session').disabled = true;
-  }
-
-  // Set the authorize button onclick
-  document.getElementById('authorizeButton').onclick = authorize;
-});
+document.addEventListener('DOMContentLoaded', handleClientLoad);
+}
