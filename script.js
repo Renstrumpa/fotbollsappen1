@@ -11,42 +11,42 @@ const sessionDrillsList = document.getElementById('session-drills-list'); // Get
 
 // Load the API client and auth library
 function handleClientLoad() {
-  console.log("handleClientLoad called");
   gapi.load('client:auth2', initClient);
 }
 
 // Initialize the API client and auth library
 function initClient() {
-  console.log("initClient called");
   gapi.auth2.init({
     client_id: CLIENT_ID,
     scope: SCOPES.join(' ')
   }).then(() => {
-    console.log("gapi.auth2.init successful");
     // Listen for sign-in state changes
     gapiAuth = gapi.auth2.getAuthInstance();
     gapiAuth.isSignedIn.listen(updateSigninStatus);
     updateSigninStatus(gapiAuth.isSignedIn.get());
 
-    // Automatically sign in the user if they are already signed in
-    if (gapiAuth.isSignedIn.get()) {
-      console.log("User is already signed in");
-      document.getElementById('authorizeButton').style.display = 'none'; // Hide auth button
-      document.getElementById('save-session').disabled = false; // Enable save button
-      getDrills(); // Load drills immediately
-    } else {
-      console.log("User is not signed in");
-      document.getElementById('authorizeButton').style.display = 'block'; // Show auth button
-      document.getElementById('save-session').disabled = true; // Disable save button
-    }
+    // Attempt immediate sign-in
+    gapiAuth.signIn({prompt: 'none'}).then(
+      function(googleUser) {
+        // Sign-in successful
+        console.log("Immediate sign-in successful");
+        document.getElementById('authorizeButton').style.display = 'none'; // Hide auth button
+        document.getElementById('save-session').disabled = false; // Enable save button
+        getDrills(); // Load drills immediately
+      },
+      function(error) {
+        // Sign-in failed
+        console.log("Immediate sign-in failed:", error);
+        document.getElementById('authorizeButton').style.display = 'block'; // Show auth button
+        document.getElementById('save-session').disabled = true; // Disable save button
+      }
+    );
 
     document.getElementById('authorizeButton').onclick = handleAuthClick;
     document.getElementById('save-session').onclick = saveSessionToSheets;
     drillThemeFilter.addEventListener('change', () => {
       getDrills(); // Re-fetch and display drills when the filter changes
     });
-  }, (error) => {
-    console.error("Error during gapi.auth2.init:", error);
   });
 }
 
