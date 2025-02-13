@@ -13,7 +13,7 @@ let createSessionButton = document.getElementById('create-session');
 
 // Function to extract access token from URL fragment
 function getAccessTokenFromUrl() {
-  const hash = window.location.substring(1); // Remove the '#'
+  const hash = window.location.hash.substring(1); // Remove the '#'
   const params = new URLSearchParams(hash);
   return params.get('access_token');
 }
@@ -186,7 +186,7 @@ function updateSessionDrillsList() {
             }
 
 
-            displayAddedDrills(foundDrills) // pass to function
+            displayAddedDrills(drills) // pass to function
         })
 
         .catch(error => console.error('Error getting Google Sheets data:', error));
@@ -288,7 +288,7 @@ document.addEventListener('DOMContentLoaded', function() {
   } else {
     console.log("No access token found");
     document.getElementById('authorizeButton').style.display = 'block';
-    document.getElementById('save-session').disabled = true;
+    document.getElementById('save-session').disabled = false;
   }
 
   // Set the authorize button onclick
