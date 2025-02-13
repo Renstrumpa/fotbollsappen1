@@ -33,24 +33,28 @@ async function getDrills() {
 }
 
 function displayDrills(drills) {
-  drillLibrary.innerHTML = ''; // Clear existing content
+    drillLibrary.innerHTML = '';  // set display data empty
 
-  drills.forEach(drill => {
-    const drillCard = document.createElement('div');
-    drillCard.className = 'drill-card p-4 border rounded shadow-md mb-4'; // Tailwind classes for styling
+    drills.forEach(drill => {
+
+    const drillCard = document.createElement('div');   // create the data box
+    drillCard.className = 'drill-card p-4 border rounded shadow-md mb-4';
 
     drillCard.innerHTML = `
-      <h3 class="text-lg font-semibold">${drill.Name}</h3>
-      <p class="text-gray-700">${drill.Description}</p>
-      <p class="text-gray-700">${drill.Tema}</p>
-      <p>Duration: ${drill.Duration} minutes</p>
-      <p>Equipment: ${drill.Equipment}</p>
-      ${drill.PictureLink ? `<img src="${drill.PictureLink}" alt="${drill.Name}" class="mt-2 max-w-full">` : ''}
-      ${drill.Link ? `<a href="${drill.Link}" target="_blank" rel="noopener noreferrer" class="text-blue-500">More Info</a>` : ''}
-    `;
+            <h3 class="text-lg font-semibold">${drill.Name}</h3>
+            <p class="text-gray-700">${drill.Description}</p>
+            <p class="text-gray-700">Theme: ${drill.Theme}</p>  <!-- ADDED THIS LINE -->
+            <p>Duration: ${drill.Duration} minutes</p>
+            <p>Equipment: ${drill.Equipment}</p>
+            ${drill.PictureLink ? `<img src="${drill.PictureLink}" alt="${drill.Name}" class="mt-2 max-w-full">` : ''}
+            ${drill.Link ? `<a href="${drill.Link}" target="_blank" rel="noopener noreferrer" class="text-blue-500">More Info</a>` : ''}
+            <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" onclick="addDrillToSession('${drill.ID}')">Add Drill to Session</button>
+          `;
 
-    drillLibrary.appendChild(drillCard);
-  });
+        drillLibrary.appendChild(drillCard);     // insert the values in a row with the header
+
+    });
+
 }
 
 getDrills();
