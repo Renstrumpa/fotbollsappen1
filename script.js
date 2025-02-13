@@ -106,7 +106,7 @@ function displayDrills(drills) {
 }
 
 const sessionForm = document.getElementById('session-form');
-const createSessionButton = document.getElementById('create-session');
+let createSessionButton = document.getElementById('create-session'); // Changed const to let
 
 let sessionDrills = []; // Array to hold drill IDs for the current session
 let currentSession = null;  // Holds current session
