@@ -146,6 +146,7 @@ const createSessionButton = document.getElementById('create-session');
 let sessionDrills = []; // Array to hold drill IDs for the current session
 let currentSession = null;  // Holds current session
 
+createSessionButton = document.getElementById('create-session'); // Get the create session button
 createSessionButton.addEventListener('click', createSession);
 
 function createSession() {
