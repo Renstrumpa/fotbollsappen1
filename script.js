@@ -223,6 +223,27 @@ function updateSessionDrillsList() {
 
 // Function to save session data back to Google Sheets
 async function saveSessionToSheets() {
+   // 1. Get authResult
+   gapi.auth2.authorize({
+    client_id: CLIENT_ID,
+    scope: SCOPES,
+    immediate: false
+  }, function(authResult) {
+    if (authResult && !authResult.error) {
+      console.log('Authorization Result:', authResult);
+      // Access token is available, load the sheets API
+      gapi.client.load('sheets', 'v4', () => {
+        console.log("Sheets API loaded");
+        // Now that we are authorized and the API is loaded, load the drills
+        getDrills();
+      });
+      document.getElementById('authorizeButton').style.display = 'none';
+      document.getElementById('save-session').disabled = false;
+    } else {
+      console.error('There was an error authorizing:', authResult);
+    }
+  });
+
   if (!gapiAuth.isSignedIn.get()) {
     alert('Please authorize first.');
     return;
