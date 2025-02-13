@@ -2,6 +2,8 @@ const apiKey = 'AIzaSyAOoFOzSAtirT5XjYUJLr1FOewcoOHxHSE'; // Replace with your a
 const spreadsheetId = '1zdr3bxIiFAYw9Mv_n4qVuRxD8Y0U_qMxIrZ74NK9JWE'; // Replace with your spreadsheet ID
 const sheetName = 'Drills';
 const drillLibrary = document.getElementById('drill-library');
+const drillThemeFilter = document.getElementById('drill-theme-filter'); // Get the filter element
+const sessionDrillsList = document.getElementById('session-drills-list'); // Get the session drills list
 
 async function getDrills() {
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${sheetName}?key=${apiKey}`;
@@ -33,35 +35,39 @@ async function getDrills() {
 }
 
 function displayDrills(drills) {
-    drillLibrary.innerHTML = '';  // set display data empty
+  drillLibrary.innerHTML = ''; // Clear existing content
 
-    drills.forEach(drill => {
-
-    const drillCard = document.createElement('div');   // create the data box
-    drillCard.className = 'drill-card p-4 border rounded shadow-md mb-4';
+  drills.forEach(drill => {
+    const drillCard = document.createElement('div');
+    drillCard.className = 'drill-card p-4 border rounded shadow-md mb-4'; // Tailwind classes for styling
 
     drillCard.innerHTML = `
-            <h3 class="text-lg font-semibold">${drill.Name}</h3>
-            <p class="text-gray-700">${drill.Description}</p>
-            <p class="text-gray-700">Theme: ${drill.Theme}</p>  <!-- ADDED THIS LINE -->
-            <p>Duration: ${drill.Duration} minutes</p>
-            <p>Equipment: ${drill.Equipment}</p>
-            ${drill.PictureLink ? `<img src="${drill.PictureLink}" alt="${drill.Name}" class="mt-2 max-w-full">` : ''}
-            ${drill.Link ? `<a href="${drill.Link}" target="_blank" rel="noopener noreferrer" class="text-blue-500">More Info</a>` : ''}
-            <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" onclick="addDrillToSession('${drill.ID}')">Add Drill to Session</button>
-          `;
+      <h3 class="text-lg font-semibold">${drill.Name}</h3>
+      <p class="text-gray-700">${drill.Description}</p>
+      <p class="text-gray-700">Theme: ${drill.Theme}</p>
+      <p>Duration: ${drill.Duration} minutes</p>
+      <p>Equipment: ${drill.Equipment}</p>
+      <label for="drill-duration-${drill.ID}">Duration (minutes):</label>
+      <input type="number" id="drill-duration-${drill.ID}" value="${drill.Duration || 10}" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+      ${drill.PictureLink ? `<img src="${drill.PictureLink}" alt="${drill.Name}" class="mt-2 max-w-full">` : ''}
+      ${drill.Link ? `<a href="${drill.Link}" target="_blank" rel="noopener noreferrer" class="text-blue-500">More Info</a>` : ''}
+      <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" onclick="addDrillToSession('${drill.ID}')">Add Drill to Session</button>
+    `;
 
-        drillLibrary.appendChild(drillCard);     // insert the values in a row with the header
-
-    });
-
+    drillLibrary.appendChild(drillCard);
+  });
 }
+
+// Add event listener to the theme filter
+drillThemeFilter.addEventListener('change', () => {
+  getDrills(); // Re-fetch and display drills when the filter changes
+});
 
 getDrills();
 
 const sessionForm = document.getElementById('session-form');
 const createSessionButton = document.getElementById('create-session');
-const sessionDrillsList = document.getElementById('session-drills-list');
+const exportPdfButton = document.getElementById('export-pdf');
 
 let sessionDrills = []; // Array to hold drill IDs for the current session
 let currentSession = null;  // Holds current session
@@ -73,6 +79,7 @@ function createSession() {
   const sessionCoach = document.getElementById('session-coach').value;
   const sessionLocation = document.getElementById('session-location').value;
   const sessionTargetAge = document.getElementById('session-target-age').value;
+  const sessionTheme = document.getElementById('session-theme').value; // Get the selected theme
 
   //Simple ID
   const newSessionId = Date.now()
@@ -82,6 +89,7 @@ function createSession() {
     Coach: sessionCoach,
     Location: sessionLocation,
     TargetAge: sessionTargetAge,
+    Theme: sessionTheme, // Include the theme in the session data
     DrillIDs: '' //Initial empty Drill ID Array
   };
 
@@ -90,6 +98,7 @@ function createSession() {
   document.getElementById('session-coach').value = ''
   document.getElementById('session-location').value = ''
   document.getElementById('session-target-age').value = ''
+  document.getElementById('session-theme').value = '' // Reset the theme dropdown
 
   alert(`Session created! Session ID: ${newSessionId}. Now add some Drills`);
 
@@ -175,27 +184,30 @@ function updateSessionDrillsList() {
 //Update Drills (and the `Add Drill` Button)
 
 function displayDrills(drills) {
-    drillLibrary.innerHTML = '';  // set display data empty
+  drillLibrary.innerHTML = '';  // set display data empty
 
-    drills.forEach(drill => {
+  const filterTheme = drillThemeFilter.value; // Get the selected theme from the filter
 
-    const drillCard = document.createElement('div');   // create the data box
-    drillCard.className = 'drill-card p-4 border rounded shadow-md mb-4';
+  drills.forEach(drill => {
+    if (filterTheme === '' || drill.Theme === filterTheme) { // Apply the filter
+      const drillCard = document.createElement('div');   // create the data box
+      drillCard.className = 'drill-card p-4 border rounded shadow-md mb-4';
 
-    drillCard.innerHTML = `
-            <h3 class="text-lg font-semibold">${drill.Name}</h3>
-            <p class="text-gray-700">${drill.Description}</p>
-            <p>Duration: ${drill.Duration} minutes</p>
-            <p>Equipment: ${drill.Equipment}</p>
-            ${drill.PictureLink ? `<img src="${drill.PictureLink}" alt="${drill.Name}" class="mt-2 max-w-full">` : ''}
-            ${drill.Link ? `<a href="${drill.Link}" target="_blank" rel="noopener noreferrer" class="text-blue-500">More Info</a>` : ''}
-            <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" onclick="addDrillToSession('${drill.ID}')">Add Drill to Session</button>
-          `;
+      drillCard.innerHTML = `
+        <h3 class="text-lg font-semibold">${drill.Name}</h3>
+        <p class="text-gray-700">${drill.Description}</p>
+        <p class="text-gray-700">Theme: ${drill.Theme}</p>
+        <p>Duration: ${drill.Duration} minutes</p>
+        <p>Equipment: ${drill.Equipment}</p>
+        <label for="drill-duration-${drill.ID}">Duration (minutes):</label>
+        <input type="number" id="drill-duration-${drill.ID}" value="${drill.Duration || 10}" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+        ${drill.PictureLink ? `<img src="${drill.PictureLink}" alt="${drill.Name}" class="mt-2 max-w-full">` : ''}
+        ${drill.Link ? `<a href="${drill.Link}" target="_blank" rel="noopener noreferrer" class="text-blue-500">More Info</a>` : ''}
+        <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" onclick="addDrillToSession('${drill.ID}')">Add Drill to Session</button>
+      `;
 
-
-        drillLibrary.appendChild(drillCard);     // insert the values in a row with the header
-
-    });
-
+      drillLibrary.appendChild(drillCard);     // insert the values in a row with the header
+    }
+  });
 }
 // call displayDrills after pushing/patching a google sheet object, the screen can auto update
