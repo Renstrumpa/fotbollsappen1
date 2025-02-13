@@ -282,10 +282,9 @@ const apiUrl = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/v
       body: JSON.stringify(requestBody),
     });
 
-    const responseData = await response.json();
-    console.log(responseData);
-
-    alert("Session saved successfully!");
+const responseData = await response.json();
+console.log(JSON.stringify(responseData));
+alert("Session saved successfully!");
 
   } catch (error) {
     console.error('Error saving session:', error);
