@@ -3,12 +3,13 @@ const SPREADSHEET_ID = '1zdr3bxIiFAYw9Mv_n4qVuRxD8Y0U_qMxIrZ74NK9JWE'; // Replac
 const SCOPES = ['https://www.googleapis.com/auth/spreadsheets']; // Full access to Google Sheets
 const REDIRECT_URI = 'https://renstrumpa.github.io/fotbollsappen1/'; // Your Redirect URI (Important!)
 
+
 let accessToken = null;
 
 const drillLibrary = document.getElementById('drill-library');
 const drillThemeFilter = document.getElementById('drill-theme-filter'); // Get the filter element
 const sessionDrillsList = document.getElementById('session-drills-list'); // Get the session drills list
-let createSessionButton = document.getElementById('create-session');
+let createSessionButton;
 
 // Function to extract access token from URL fragment
 function getAccessTokenFromUrl() {
@@ -98,7 +99,7 @@ function displayDrills(drills) {
 }
 
 const sessionForm = document.getElementById('session-form');
-let createSessionButton = document.getElementById('create-session');
+let createSessionButton;
 
 let sessionDrills = []; // Array to hold drill IDs for the current session
 let currentSession = null;  // Holds current session
