@@ -3,6 +3,7 @@ const SPREADSHEET_ID = '1zdr3bxIiFAYw9Mv_n4qVuRxD8Y0U_qMxIrZ74NK9JWE'; // Replac
 const SCOPES = ['https://www.googleapis.com/auth/spreadsheets']; // Full access to Google Sheets
 const REDIRECT_URI = 'https://renstrumpa.github.io/fotbollsappen1/'; // Your Redirect URI (Important!)
 
+
 let accessToken = null;
 
 const drillLibrary = document.getElementById('drill-library');
@@ -12,7 +13,7 @@ let createSessionButton = document.getElementById('create-session');
 
 // Function to extract access token from URL fragment
 function getAccessTokenFromUrl() {
-  const hash = window.location.hash.substring(1); // Remove the '#'
+  const hash = window.location.substring(1); // Remove the '#'
   const params = new URLSearchParams(hash);
   return params.get('access_token');
 }
@@ -153,10 +154,15 @@ function updateSessionDrillsList() {
   sessionDrillsList.innerHTML = ''; // Clear existing list
 
   // Fetch and display drills from Google Sheets
-  const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/Drills?key=${API_KEY}`;
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/Drills?valueRenderOption=USER_ENTERED`;
 
   // ... (Similar to the getDrills function, but only retrieve selected drill IDs from the sessionDrills array)
-    fetch(url)
+   fetch(url, {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      }
+    })
         .then(response => response.json())
         .then(data => {
             const headers = data.values[0]; // headers
@@ -216,26 +222,6 @@ function updateSessionDrillsList() {
 // Function to save session data back to Google Sheets
 async function saveSessionToSheets() {
    // 1. Get authResult
-   gapi.auth2.authorize({
-    client_id: CLIENT_ID,
-    scope: SCOPES,
-    immediate: false
-  }, function(authResult) {
-    if (authResult && !authResult.error) {
-      console.log('Authorization Result:', authResult);
-      // Access token is available, load the sheets API
-      gapi.client.load('sheets', 'v4', () => {
-        console.log("Sheets API loaded");
-        // Now that we are authorized and the API is loaded, load the drills
-        getDrills();
-      });
-      document.getElementById('authorizeButton').style.display = 'none';
-      document.getElementById('save-session').disabled = false;
-    } else {
-      console.error('There was an error authorizing:', authResult);
-    }
-  });
-
   if (!accessToken) {
     alert('Please authorize first.');
     return;
@@ -289,5 +275,22 @@ async function saveSessionToSheets() {
   }
 
 // Load the API client after the page loads
-document.addEventListener('DOMContentLoaded', handleClientLoad);
-}
+document.addEventListener('DOMContentLoaded', function() {
+  // Check for access token in URL
+  accessToken = getAccessTokenFromUrl();
+
+  if (accessToken) {
+    console.log("Access token found:", accessToken);
+    // Access token is available, load the drills
+    getDrills();
+    document.getElementById('authorizeButton').style.display = 'none';
+    document.getElementById('save-session').disabled = false;
+  } else {
+    console.log("No access token found");
+    document.getElementById('authorizeButton').style.display = 'block';
+    document.getElementById('save-session').disabled = true;
+  }
+
+  // Set the authorize button onclick
+  document.getElementById('authorizeButton').onclick = authorize;
+});
