@@ -37,24 +37,35 @@ async function getDrills() {
 function displayDrills(drills) {
   drillLibrary.innerHTML = ''; // Clear existing content
 
+  const filterTheme = drillThemeFilter.value; // Get the selected theme from the filter
+
   drills.forEach(drill => {
-    const drillCard = document.createElement('div');
-    drillCard.className = 'drill-card p-4 border rounded shadow-md mb-4'; // Tailwind classes for styling
+    if (filterTheme === '' || drill.Fokus === filterTheme) { // Apply the filter
+      const drillCard = document.createElement('div');
+      drillCard.className = 'drill-card p-4 border rounded shadow-md mb-4';
 
-    drillCard.innerHTML = `
-      <h3 class="text-lg font-semibold">${drill.Name}</h3>
-      <p class="text-gray-700">${drill.Description}</p>
-      <p class="text-gray-700">Fokus: ${drill.Fokus}</p>
-      <p>Duration: ${drill.Duration} minutes</p>
-      <p>Equipment: ${drill.Equipment}</p>
-      <label for="drill-duration-${drill.ID}">Duration (minutes):</label>
-      <input type="number" id="drill-duration-${drill.ID}" value="${drill.Duration || 10}" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-      ${drill.PictureLink ? `<img src="${drill.PictureLink}" alt="${drill.Name}" class="mt-2 max-w-full">` : ''}
-      ${drill.Link ? `<a href="${drill.Link}" target="_blank" rel="noopener noreferrer" class="text-blue-500">More Info</a>` : ''}
-      <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" onclick="addDrillToSession('${drill.ID}')">Add Drill to Session</button>
-    `;
+      drillCard.innerHTML = `
+        <h3 class="text-lg font-semibold">${drill.Name}</h3>
+        <p class="text-gray-700">${drill.Description}</p>
+        <p class="text-gray-700">Fokus: ${drill.Fokus}</p>
+        <p>Equipment: ${drill.Equipment}</p>
+        <label for="drill-duration-${drill.ID}">Duration (minutes):</label>
+        <select id="drill-duration-${drill.ID}" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+          <option value="5">5</option>
+          <option value="10" selected>10</option>
+          <option value="15">15</option>
+          <option value="20">20</option>
+          <option value="30">30</option>
+          <option value="40">40</option>
+          <option value="45">45</option>
+        </select>
+        ${drill.PictureLink ? `<img src="${drill.PictureLink}" alt="${drill.Name}" class="mt-2 max-w-full">` : ''}
+        ${drill.Link ? `<a href="${drill.Link}" target="_blank" rel="noopener noreferrer" class="text-blue-500">More Info</a>` : ''}
+        <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" onclick="addDrillToSession('${drill.ID}')">Add Drill to Session</button>
+      `;
 
-    drillLibrary.appendChild(drillCard);
+      drillLibrary.appendChild(drillCard);
+    }
   });
 }
 
@@ -67,12 +78,14 @@ getDrills();
 
 const sessionForm = document.getElementById('session-form');
 const createSessionButton = document.getElementById('create-session');
-const exportPdfButton = document.getElementById('export-pdf');
+const saveSessionButton = document.getElementById('save-session'); // Get the save session button
+const exportPdfButton = document.getElementById('export-pdf'); //This is not used
 
 let sessionDrills = []; // Array to hold drill IDs for the current session
 let currentSession = null;  // Holds current session
 
 createSessionButton.addEventListener('click', createSession);
+saveSessionButton.addEventListener('click', saveSessionToSheets); // Add event listener for saving
 
 function createSession() {
   const sessionName = document.getElementById('session-name').value;
@@ -189,18 +202,25 @@ function displayDrills(drills) {
   const filterTheme = drillThemeFilter.value; // Get the selected theme from the filter
 
   drills.forEach(drill => {
-    if (filterTheme === '' || drill.Theme === filterTheme) { // Apply the filter
+    if (filterTheme === '' || drill.Fokus === filterTheme) { // Apply the filter
       const drillCard = document.createElement('div');   // create the data box
       drillCard.className = 'drill-card p-4 border rounded shadow-md mb-4';
 
       drillCard.innerHTML = `
         <h3 class="text-lg font-semibold">${drill.Name}</h3>
         <p class="text-gray-700">${drill.Description}</p>
-        <p class="text-gray-700">Theme: ${drill.Theme}</p>
-        <p>Duration: ${drill.Duration} minutes</p>
+        <p class="text-gray-700">Fokus: ${drill.Fokus}</p>
         <p>Equipment: ${drill.Equipment}</p>
         <label for="drill-duration-${drill.ID}">Duration (minutes):</label>
-        <input type="number" id="drill-duration-${drill.ID}" value="${drill.Duration || 10}" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+        <select id="drill-duration-${drill.ID}" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+          <option value="5">5</option>
+          <option value="10" selected>10</option>
+          <option value="15">15</option>
+          <option value="20">20</option>
+          <option value="30">30</option>
+          <option value="40">40</option>
+          <option value="45">45</option>
+        </select>
         ${drill.PictureLink ? `<img src="${drill.PictureLink}" alt="${drill.Name}" class="mt-2 max-w-full">` : ''}
         ${drill.Link ? `<a href="${drill.Link}" target="_blank" rel="noopener noreferrer" class="text-blue-500">More Info</a>` : ''}
         <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" onclick="addDrillToSession('${drill.ID}')">Add Drill to Session</button>
@@ -211,3 +231,63 @@ function displayDrills(drills) {
   });
 }
 // call displayDrills after pushing/patching a google sheet object, the screen can auto update
+
+// Function to save session data back to Google Sheets
+async function saveSessionToSheets() {
+  if (currentSession === null) {
+    alert('No session created. Please create a session first.');
+    return;
+  }
+
+  // 1. Capture Drill Durations
+  const drillData = sessionDrills.map(drillId => {
+    const durationSelect = document.getElementById(`drill-duration-${drillId}`);
+    const duration = durationSelect ? durationSelect.value : 10; // Default to 10 if not found
+    return {
+      drillId: drillId,
+      duration: duration
+    };
+  });
+
+  // 2. Format Session Data
+  const drillIDsAndDurations = drillData.map(item => `${item.drillId}:${item.duration}`).join(','); // Format: "drillId1:duration1,drillId2:duration2,..."
+
+  // 3. Prepare Data for Google Sheets
+  const values = [
+    [
+      currentSession.ID,
+      currentSession.Name,
+      currentSession.Coach,
+      currentSession.Location,
+      currentSession.TargetAge,
+      currentSession.Theme,
+      drillIDsAndDurations // Save drill IDs and durations as a comma-separated string
+    ]
+  ];
+
+  // 4. Send Data to Google Sheets
+  const apiUrl = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/Sessions:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS&key=${apiKey}`;
+
+  const requestBody = {
+    values: values
+  };
+
+  try {
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody),
+    });
+
+    const responseData = await response.json();
+    console.log(responseData);
+
+    alert("Session saved successfully!");
+
+  } catch (error) {
+    console.error('Error saving session:', error);
+    alert("Error saving session. Check console for details.");
+  }
+}
