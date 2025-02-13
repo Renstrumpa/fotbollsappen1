@@ -1,5 +1,5 @@
 const CLIENT_ID = '154778312454-v2vq7abfddnpcc01vduvkr5b0gns5713.apps.googleusercontent.com'; // Replace with your Client ID
-const API_KEY = 'AIzaSyAOoFOzSAtirT5XjYUJLr1FOewcoOHxHSE'; // Replace with your API key - (You can remove this later)
+const API_KEY = 'YOUR_API_KEY'; // Replace with your API key - (You can remove this later)
 const SPREADSHEET_ID = '1zdr3bxIiFAYw9Mv_n4qVuRxD8Y0U_qMxIrZ74NK9JWE'; // Replace with your spreadsheet ID
 const SCOPES = ['https://www.googleapis.com/auth/spreadsheets']; // Full access to Google Sheets
 
@@ -16,11 +16,9 @@ function handleClientLoad() {
 
 // Initialize the API client and auth library
 function initClient() {
-  gapi.client.init({
-    apiKey: API_KEY, // Use the API key for initial setup
-    clientId: CLIENT_ID,
-    scope: SCOPES.join(' '),
-    discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
+  gapi.auth2.init({
+    client_id: CLIENT_ID,
+    scope: SCOPES.join(' ')
   }).then(() => {
     // Listen for sign-in state changes
     gapiAuth = gapi.auth2.getAuthInstance();
@@ -34,6 +32,7 @@ function initClient() {
       document.getElementById('save-session').disabled = false; // Enable save button
       getDrills(); // Load drills immediately
     } else {
+      console.log("User is not signed in");
       document.getElementById('authorizeButton').style.display = 'block'; // Show auth button
       document.getElementById('save-session').disabled = true; // Disable save button
     }
@@ -64,11 +63,18 @@ function handleAuthClick() {
 }
 
 async function getDrills() {
-  const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/Drills?key=${API_KEY}`;
+  if (!gapiAuth.isSignedIn.get()) {
+    console.log("Not authorized to get drills");
+    return;
+  }
 
   try {
-    const response = await fetch(url);
-    const data = await response.json();
+    const response = await gapi.client.sheets.spreadsheets.values.get({
+      spreadsheetId: SPREADSHEET_ID,
+      range: 'Drills',
+    });
+
+    const data = response.result;
     const rows = data.values;
 
     if (rows && rows.length > 1) { // Ensure there's data beyond the header row
@@ -198,108 +204,4 @@ function updateSessionDrillsList() {
 
                       const drill = {};
 
-                      for (let i = 0; i < headers.length; i++) {
-                        drill[headers[i]] = row[i];
-                      }
-                      foundDrills.push(drill);
-
-                  }
-                }
-
-            }
-
-
-            displayAddedDrills(foundDrills) // pass to function
-        })
-
-        .catch(error => console.error('Error getting Google Sheets data:', error));
-
-  function displayAddedDrills(drills) {
-
-      sessionDrillsList.innerHTML = "";  // set the displayed data to empty, so duplicate information can be avoided
-
-
-      drills.forEach(drill => {
-
-
-        const listItem = document.createElement('li');  // create the new data item
-
-        listItem.className = "drill-card p-4 border rounded shadow-md mb-4";
-
-        listItem.innerHTML = `
-                <h3 class="text-lg font-semibold">${drill.Name}</h3>
-                <p class="text-gray-700">${drill.Description}</p>
-                <p>Duration: ${drill.Duration} minutes</p>
-                <p>Equipment: ${drill.Equipment}</p>
-                ${drill.PictureLink ? `<img src="${drill.PictureLink}" alt="${drill.Name}" class="mt-2 max-w-full">` : ''}
-                ${drill.Link ? `<a href="${drill.Link}" target="_blank" rel="noopener noreferrer" class="text-blue-500">More Info</a>` : ''}
-              `;
-
-        sessionDrillsList.appendChild(listItem);    // insert the values in a row with the header
-
-    });
-    };
-
-}
-
-// Function to save session data back to Google Sheets
-async function saveSessionToSheets() {
-  if (!gapiAuth.isSignedIn.get()) {
-    alert('Please authorize first.');
-    return;
-  }
-
-  if (currentSession === null) {
-    alert('No session created. Please create a session first.');
-    return;
-  }
-
-  // 1. Capture Drill Durations
-  const drillData = sessionDrills.map(drillId => {
-    const durationSelect = document.getElementById(`drill-duration-${drillId}`);
-    const duration = durationSelect ? durationSelect.value : 10; // Default to 10 if not found
-    return {
-      drillId: drillId,
-      duration: duration
-    };
-  });
-
-  // 2. Format Session Data
-  const drillIDsAndDurations = drillData.map(item => `${item.drillId}:${item.duration}`).join(','); // Format: "drillId1:duration1,drillId2:duration2,..."
-
-  // 3. Prepare Data for Google Sheets
-  const values = [
-    [
-      currentSession.ID,
-      currentSession.Name,
-      currentSession.Coach,
-      currentSession.Location,
-      currentSession.TargetAge,
-      currentSession.Theme,
-      drillIDsAndDurations // Save drill IDs and durations as a comma-separated string
-    ]
-  ];
-
-  // 4. Send Data to Google Sheets
-  try {
-    const response = await gapi.client.sheets.spreadsheets.values.append({
-      spreadsheetId: SPREADSHEET_ID,
-      range: 'Sessions',
-      valueInputOption: 'USER_ENTERED',
-      insertDataOption: 'INSERT_ROWS',
-      values: values,
-    });
-
-    const responseData = response.result;
-    console.log(responseData);
-
-    alert("Session saved successfully!");
-
-  } catch (error) {
-    console.error('Error saving session:', error);
-    alert("Error saving session. Check console for details.");
-  }
-}
-
-// Load the API client after the page loads
-document.addEventListener('DOMContentLoaded', handleClientLoad);
+                      for (let i = 0;
