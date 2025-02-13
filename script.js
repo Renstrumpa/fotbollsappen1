@@ -44,7 +44,7 @@ function displayDrills(drills) {
     drillCard.innerHTML = `
       <h3 class="text-lg font-semibold">${drill.Name}</h3>
       <p class="text-gray-700">${drill.Description}</p>
-      <p class="text-gray-700">Theme: ${drill.Theme}</p>
+      <p class="text-gray-700">Fokus: ${drill.Fokus}</p>
       <p>Duration: ${drill.Duration} minutes</p>
       <p>Equipment: ${drill.Equipment}</p>
       <label for="drill-duration-${drill.ID}">Duration (minutes):</label>
