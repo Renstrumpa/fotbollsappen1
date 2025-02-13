@@ -11,70 +11,35 @@ const sessionDrillsList = document.getElementById('session-drills-list'); // Get
 
 // Load the API client and auth library
 function handleClientLoad() {
-  gapi.load('client:auth2', initClient);
-}
+  gapi.load('client', () => {
+    console.log("gapi loaded");
+    // Attach a click handler to the button that will call the authorize method.
+    document.getElementById('authorizeButton').onclick = function() {
+      gapi.auth2.authorize({
+        client_id: CLIENT_ID,
+        scope: SCOPES,
+        immediate: false
+      }, function(authResult) {
+        if (authResult && !authResult.error) {
+          console.log('Authorization Result:', authResult);
+          // Access token is available, load the sheets API
+          gapi.client.load('sheets', 'v4', () => {
+            console.log("Sheets API loaded");
+            // Now that we are authorized and the API is loaded, load the drills
+            getDrills();
+          });
+          document.getElementById('authorizeButton').style.display = 'none';
+          document.getElementById('save-session').disabled = false;
 
-// Initialize the API client and auth library
-function initClient() {
-  gapi.auth2.init({
-    client_id: CLIENT_ID,
-    scope: SCOPES.join(' ')
-  }).then(() => {
-    // Listen for sign-in state changes
-    gapiAuth = gapi.auth2.getAuthInstance();
-    gapiAuth.isSignedIn.listen(updateSigninStatus);
-    updateSigninStatus(gapiAuth.isSignedIn.get());
-
-    // Attempt immediate sign-in
-    gapiAuth.signIn({prompt: 'none'}).then(
-      function(googleUser) {
-        // Sign-in successful
-        console.log("Immediate sign-in successful");
-        document.getElementById('authorizeButton').style.display = 'none'; // Hide auth button
-        document.getElementById('save-session').disabled = false; // Enable save button
-        getDrills(); // Load drills immediately
-      },
-      function(error) {
-        // Sign-in failed
-        console.log("Immediate sign-in failed:", error);
-        document.getElementById('authorizeButton').style.display = 'block'; // Show auth button
-        document.getElementById('save-session').disabled = true; // Disable save button
-      }
-    );
-
-    document.getElementById('authorizeButton').onclick = handleAuthClick;
-    document.getElementById('save-session').onclick = saveSessionToSheets;
-    drillThemeFilter.addEventListener('change', () => {
-      getDrills(); // Re-fetch and display drills when the filter changes
-    });
+        } else {
+          console.error('There was an error authorizing:', authResult);
+        }
+      });
+    };
   });
 }
 
-function updateSigninStatus(isSignedIn) {
-  console.log("updateSigninStatus called, isSignedIn:", isSignedIn);
-  if (isSignedIn) {
-    console.log('User is signed in.');
-    document.getElementById('authorizeButton').style.display = 'none'; // Hide auth button
-    document.getElementById('save-session').disabled = false; // Enable save button
-    getDrills(); // Load drills when signed in
-  } else {
-    console.log('User is not signed in.');
-    document.getElementById('authorizeButton').style.display = 'block'; // Show auth button
-    document.getElementById('save-session').disabled = true; // Disable save button
-  }
-}
-
-function handleAuthClick() {
-  console.log("handleAuthClick called");
-  gapiAuth.signIn();
-}
-
 async function getDrills() {
-  if (!gapiAuth.isSignedIn.get()) {
-    console.log("Not authorized to get drills");
-    return;
-  }
-
   try {
     const response = await gapi.client.sheets.spreadsheets.values.get({
       spreadsheetId: SPREADSHEET_ID,
@@ -294,26 +259,18 @@ async function saveSessionToSheets() {
     ]
   ];
 
-  // 4. Send Data to Google Sheets
   try {
     const response = await gapi.client.sheets.spreadsheets.values.append({
       spreadsheetId: SPREADSHEET_ID,
       range: 'Sessions',
       valueInputOption: 'USER_ENTERED',
       insertDataOption: 'INSERT_ROWS',
-      values: values,
+      values: values
     });
-
-    const responseData = response.result;
-    console.log(responseData);
-
-    alert("Session saved successfully!");
-
+    console.log(response);
   } catch (error) {
-    console.error('Error saving session:', error);
-    alert("Error saving session. Check console for details.");
+    console.log(error.message)
   }
-}
 
 // Load the API client after the page loads
 document.addEventListener('DOMContentLoaded', handleClientLoad);
