@@ -279,3 +279,4 @@ async function saveSessionToSheets() {
 
 // Load the API client after the page loads
 document.addEventListener('DOMContentLoaded', handleClientLoad);
+ }
