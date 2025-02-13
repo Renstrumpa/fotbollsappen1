@@ -3,7 +3,6 @@ const SPREADSHEET_ID = '1zdr3bxIiFAYw9Mv_n4qVuRxD8Y0U_qMxIrZ74NK9JWE'; // Replac
 const SCOPES = ['https://www.googleapis.com/auth/spreadsheets']; // Full access to Google Sheets
 const REDIRECT_URI = 'https://renstrumpa.github.io/fotbollsappen1/'; // Your Redirect URI (Important!)
 
-
 let accessToken = null;
 
 const drillLibrary = document.getElementById('drill-library');
@@ -186,7 +185,7 @@ function updateSessionDrillsList() {
             }
 
 
-            displayAddedDrills(drills) // pass to function
+            displayAddedDrills(foundDrills) // pass to function
         })
 
         .catch(error => console.error('Error getting Google Sheets data:', error));
@@ -288,7 +287,7 @@ document.addEventListener('DOMContentLoaded', function() {
   } else {
     console.log("No access token found");
     document.getElementById('authorizeButton').style.display = 'block';
-    document.getElementById('save-session').disabled = false;
+    document.getElementById('save-session').disabled = true;
   }
 
   // Set the authorize button onclick
