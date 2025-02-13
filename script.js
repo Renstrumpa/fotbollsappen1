@@ -11,31 +11,15 @@ const sessionDrillsList = document.getElementById('session-drills-list'); // Get
 
 // Load the API client and auth library
 function handleClientLoad() {
-  gapi.load('client', () => {
-    console.log("gapi loaded");
-    // Attach a click handler to the button that will call the authorize method.
-    document.getElementById('authorizeButton').onclick = function() {
-      gapi.auth2.authorize({
-        client_id: CLIENT_ID,
-        scope: SCOPES,
-        immediate: false
-      }, function(authResult) {
-        if (authResult && !authResult.error) {
-          console.log('Authorization Result:', authResult);
-          // Access token is available, load the sheets API
-          gapi.client.load('sheets', 'v4', () => {
-            console.log("Sheets API loaded");
-            // Now that we are authorized and the API is loaded, load the drills
-            getDrills();
-          });
-          document.getElementById('authorizeButton').style.display = 'none';
-          document.getElementById('save-session').disabled = false;
-
-        } else {
-          console.error('There was an error authorizing:', authResult);
-        }
-      });
-    };
+  console.log("handleClientLoad called");
+  gapi.load('auth2', function() {
+    console.log("auth2 loaded");
+    // The gapi.auth2 library is now loaded, you can proceed with initialization
+    // For example:
+    // gapi.auth2.init({
+    //   client_id: CLIENT_ID,
+    //   scope: SCOPES.join(' ')
+    // }).then(...);
   });
 }
 
