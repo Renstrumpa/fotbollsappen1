@@ -11,15 +11,18 @@ const sessionDrillsList = document.getElementById('session-drills-list'); // Get
 
 // Load the API client and auth library
 function handleClientLoad() {
+  console.log("handleClientLoad called");
   gapi.load('client:auth2', initClient);
 }
 
 // Initialize the API client and auth library
 function initClient() {
+  console.log("initClient called");
   gapi.auth2.init({
     client_id: CLIENT_ID,
     scope: SCOPES.join(' ')
   }).then(() => {
+    console.log("gapi.auth2.init successful");
     // Listen for sign-in state changes
     gapiAuth = gapi.auth2.getAuthInstance();
     gapiAuth.isSignedIn.listen(updateSigninStatus);
@@ -42,10 +45,13 @@ function initClient() {
     drillThemeFilter.addEventListener('change', () => {
       getDrills(); // Re-fetch and display drills when the filter changes
     });
+  }, (error) => {
+    console.error("Error during gapi.auth2.init:", error);
   });
 }
 
 function updateSigninStatus(isSignedIn) {
+  console.log("updateSigninStatus called, isSignedIn:", isSignedIn);
   if (isSignedIn) {
     console.log('User is signed in.');
     document.getElementById('authorizeButton').style.display = 'none'; // Hide auth button
@@ -59,6 +65,7 @@ function updateSigninStatus(isSignedIn) {
 }
 
 function handleAuthClick() {
+  console.log("handleAuthClick called");
   gapiAuth.signIn();
 }
 
